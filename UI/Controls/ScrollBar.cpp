@@ -37,7 +37,7 @@ Step(10),
 Visibility(ScrollBarVisibility::Auto),
 Width(12),
 iStep(0),
-ptStart(-1, -1),
+m_StartPoint(-1, -1),
 uHighlight(ScrollBarButton::None),
 uOrientation(orientation),
 uStart(0)
@@ -181,7 +181,7 @@ switch(uOrientation)
 		{
 		if(pt.Left<width)
 			return ScrollBarButton::First;
-		if(pt.Left>rcRect.GetWidth()-width)
+		if(pt.Left>m_Rect.GetWidth()-width)
 			return ScrollBarButton::Second;
 		return ScrollBarButton::Bar;
 		}
@@ -189,7 +189,7 @@ switch(uOrientation)
 		{
 		if(pt.Top<width)
 			return ScrollBarButton::First;
-		if(pt.Top>rcRect.GetHeight()-width)
+		if(pt.Top>m_Rect.GetHeight()-width)
 			return ScrollBarButton::Second;
 		return ScrollBarButton::Bar;
 		}
@@ -218,7 +218,7 @@ switch(button)
 	case ScrollBarButton::Bar:
 		{
 		uStart=Position;
-		ptStart=pt;
+		m_StartPoint=pt;
 		CapturePointer();
 		args->Handled=true;
 		break;
@@ -241,7 +241,7 @@ Invalidate();
 VOID ScrollBar::OnPointerMoved(Handle<PointerEventArgs> args)
 {
 POINT const& pt=args->Point;
-if(ptStart.Left==-1)
+if(m_StartPoint.Left==-1)
 	{
 	auto highlight=GetButton(args->Point);
 	if(uHighlight!=highlight)
@@ -258,13 +258,13 @@ switch(uOrientation)
 	{
 	case Orientation::Horizontal:
 		{
-		start=ptStart.Left;
+		start=m_StartPoint.Left;
 		pos=pt.Left;
 		break;
 		}
 	case Orientation::Vertical:
 		{
-		start=ptStart.Top;
+		start=m_StartPoint.Top;
 		pos=pt.Top;
 		break;
 		}
@@ -283,10 +283,10 @@ args->Handled=true;
 VOID ScrollBar::OnPointerUp(Handle<PointerEventArgs> args)
 {
 StopScrolling();
-if(ptStart.Left!=-1)
+if(m_StartPoint.Left!=-1)
 	{
 	ReleasePointer();
-	ptStart.Set(-1, -1);
+	m_StartPoint.Set(-1, -1);
 	args->Handled=true;
 	}
 }

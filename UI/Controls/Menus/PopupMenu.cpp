@@ -29,13 +29,14 @@ namespace UI {
 // Con-/Destructors
 //==================
 
-PopupMenu::PopupMenu(UI::Frame* frame, Menu* parent):
-StackPanel(frame, Orientation::Vertical),
-Menu(this, parent)
+PopupMenu::PopupMenu(Window* parent, Menu* parent_menu):
+Popup(parent),
+Menu(this, parent_menu)
 {
-AlignChildren=Alignment::Stretch;
-Padding.Set(4, 4, 4, 4);
-Visible=false;
+auto panel=new StackPanel(this, Orientation::Vertical);
+panel->AlignChildren=Alignment::Stretch;
+panel->Padding.Set(4, 4, 4, 4);
+Panel=panel;
 }
 
 
@@ -60,12 +61,6 @@ auto theme=GetTheme();
 return theme->GetControlBrush();
 }
 
-Handle<Brush> PopupMenu::GetBorderBrush()
-{
-auto theme=GetTheme();
-return theme->GetBorderBrush();
-}
-
 Graphics::SIZE PopupMenu::GetMinSize(RenderTarget* target)
 {
 FLOAT scale=GetScaleFactor();
@@ -77,7 +72,7 @@ bool icon=false;
 bool arrow=false;
 bool separator=true;
 Handle<UI::Window> last_sep;
-for(auto it=Children->First(); it->HasCurrent(); it->MoveNext())
+for(auto it=Panel->Children->First(); it->HasCurrent(); it->MoveNext())
 	{
 	auto child=it->GetCurrent();
 	auto item=Convert<PopupMenuItem>(child);
@@ -127,7 +122,7 @@ if(arrow)
 	SIZE arrow_size=target->MeasureText(font, scale, TEXT(">"));
 	shortcut_width+=arrow_size+10*scale;
 	}
-for(auto it=Children->First(); it->HasCurrent(); it->MoveNext())
+for(auto it=Panel->Children->First(); it->HasCurrent(); it->MoveNext())
 	{
 	auto child=it->GetCurrent();
 	auto item=Convert<PopupMenuItem>(child);
@@ -135,27 +130,24 @@ for(auto it=Children->First(); it->HasCurrent(); it->MoveNext())
 		continue;
 	item->SetColumns(icon_width, label_width, shortcut_width);
 	}
-return StackPanel::GetMinSize(target);
+return Overlapped::GetMinSize(target);
 }
 
-VOID PopupMenu::Show(UI::Window* owner, POINT const& pt)
+VOID PopupMenu::Show(POINT const& pt)
 {
-Popup(this);
-pOwner=owner;
-auto frame=GetFrame();
-auto current=frame->GetCurrentMenu();
+auto current=Application::Current->GetCurrentMenu();
 if(current)
 	{
 	if(!IsParentMenu(current))
 		current->Close();
 	}
-frame->SetCurrentMenu(this);
+Application::Current->SetCurrentMenu(this);
 BOOL keyboard=false;
-if(pParentMenu)
-	keyboard|=pParentMenu->HasKeyboardAccess();
-SetFlag(uMenuFlags, MenuFlags::KeyboardAccess, keyboard);
-rcRect.Left=pt.Left;
-rcRect.Top=pt.Top;
+if(m_ParentMenu)
+	keyboard|=m_ParentMenu->HasKeyboardAccess();
+SetFlag(m_MenuFlags, MenuFlags::KeyboardAccess, keyboard);
+RECT rc(pt.Left, pt.Top, pt.Left, pt.Top);
+Move(rc);
 Visible=true;
 }
 

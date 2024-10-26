@@ -11,7 +11,8 @@
 
 #include "Resources/Icons/Edit.h"
 #include "Resources/Strings/Edit.h"
-#include "UI/Frame.h"
+#include "UI/Application.h"
+#include "UI/AppWindow.h"
 #include "EditMenu.h"
 
 using namespace Graphics;
@@ -32,26 +33,27 @@ namespace UI {
 // Con-/Destructors
 //==================
 
-EditMenu::EditMenu(Frame* frame):
-PopupMenu(frame, nullptr)
+EditMenu::EditMenu():
+PopupMenu(AppWindow::Current)
 {
+auto app=Application::Current;
 SelectAll=Add(STR_MM_EDIT_SELECT_ALL);
-SelectAll->Clicked.Add(frame, &Frame::EditSelectAll);
+SelectAll->Clicked.Add(app, &Application::EditSelectAll);
 SelectAll->Icon=new Icon(ICO_EDIT_SELECT_ALL);
 Add(nullptr);
 Copy=Add(STR_MM_EDIT_COPY);
-Copy->Clicked.Add(frame, &Frame::EditCopy);
+Copy->Clicked.Add(app, &Application::EditCopy);
 Copy->Icon=new Icon(ICO_EDIT_COPY);
 Add(nullptr);
 Cut=Add(STR_MM_EDIT_CUT);
-Cut->Clicked.Add(frame, &Frame::EditCut);
+Cut->Clicked.Add(app, &Application::EditCut);
 Cut->Icon=new Icon(ICO_EDIT_CUT);
 Delete=Add(STR_MM_EDIT_DELETE);
-Delete->Clicked.Add(frame, &Frame::EditDelete);
+Delete->Clicked.Add(app, &Application::EditDelete);
 Delete->Icon=new Icon(ICO_EDIT_DELETE);
 Add(nullptr);
 Paste=Add(STR_MM_EDIT_PASTE);
-Paste->Clicked.Add(frame, &Frame::EditPaste);
+Paste->Clicked.Add(app, &Application::EditPaste);
 Paste->Icon=new Icon(ICO_EDIT_PASTE);
 }
 

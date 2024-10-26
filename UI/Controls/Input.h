@@ -51,6 +51,7 @@ public:
 	SIZE GetMinSize(RenderTarget* Target)override;
 	Handle<String> GetSelection();
 	Handle<String> GetText();
+	BOOL KillFocus()override;
 	TCHAR Mask;
 	BOOL MultiLine;
 	RECT Padding;
@@ -59,7 +60,9 @@ public:
 	VOID Render(RenderTarget* Target, RECT& Rect)override;
 	VOID ReplaceSelection(LPCTSTR Value);
 	VOID SelectAll();
+	VOID SelectNone();
 	Event<Input> SelectionChanged;
+	VOID SetFocus(FocusReason Reason=FocusReason::None)override;
 	VOID SetSelection(POINT const& Start, POINT const& End);
 	VOID SetText(Handle<String> Text);
 

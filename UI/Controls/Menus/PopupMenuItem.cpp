@@ -35,7 +35,7 @@ namespace UI {
 //==================
 
 PopupMenuItem::PopupMenuItem(PopupMenu* menu, Handle<Sentence> label):
-Interactive(menu),
+Interactive(menu->Panel),
 MenuItem(this, menu),
 Label(this),
 Padding(12, 3, 12, 3),
@@ -227,10 +227,7 @@ if(label)
 	Text=GetMenuLabel(label->Begin());
 	auto shortcut=ShortcutFromString(Shortcut);
 	if(shortcut)
-		{
-		auto frame=GetFrame();
-		frame->Shortcuts->Set(shortcut, this, false);
-		}
+		Application::Current->Shortcuts->Set(shortcut, this, false);
 	Enabled=true;
 	}
 else
@@ -270,7 +267,7 @@ switch(args->Key)
 	case VirtualKey::Up:
 		{
 		auto parent_menu=pMenu->GetParentMenu();
-		auto menubar=Convert<MenuBar>(parent_menu->Window);
+		auto menubar=Convert<MenuBar>(parent_menu->Panel);
 		if(menubar)
 			{
 			auto control=Interactive::GetNextControl(Parent, nullptr, 0);
@@ -311,15 +308,14 @@ VOID PopupMenuItem::OnPointerEntered()
 {
 Invalidate();
 pMenu->KillKeyboardAccess();
-auto frame=GetFrame();
-auto current=frame->GetCurrentMenu();
+auto current=Application::Current->GetCurrentMenu();
 if(current==SubMenu)
 	return;
 auto menu=pMenu;
 while(current!=menu)
 	{
 	current->Close();
-	current=frame->GetCurrentMenu();
+	current=Application::Current->GetCurrentMenu();
 	}
 if(SubMenu)
 	{

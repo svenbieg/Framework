@@ -52,7 +52,7 @@ uInputFlags(InputFlags::None),
 uLineHeight(0)
 {
 auto frame=GetFrame();
-ContextMenu=new EditMenu(frame);
+ContextMenu=new EditMenu();
 Focused.Add(this, &Input::OnFocused);
 FocusLost.Add(this, &Input::OnFocusLost);
 KeyDown.Add(this, &Input::OnKeyDown);
@@ -165,6 +165,14 @@ GetText(pt_start, pt_end, buf, len+1);
 return text;
 }
 
+BOOL Input::KillFocus()
+{
+auto app=Application::Current;
+if(app->GetCurrentInput()==this)
+	app->SetCurrentInput(nullptr);
+return Interactive::KillFocus();
+}
+
 VOID Input::ReadFromStream(InputStream* stream)
 {
 Clear();
@@ -196,7 +204,12 @@ UINT line_height=uLineHeight*scale;
 UINT first_line=offset.Top/line_height;
 UINT line_count=client_height/line_height+2;
 UINT last_line=first_line+line_count-1;
-if(ptSelectionFirst!=ptSelectionLast)
+BOOL show_sel=true;
+if(ptSelectionFirst==ptSelectionLast)
+	show_sel=false;
+if(Application::Current->GetCurrentInput()!=this)
+	show_sel=false;
+if(show_sel)
 	{
 	auto highlight=theme->GetHighlightBrush();
 	if(!HasFocus())
@@ -374,7 +387,18 @@ VOID Input::SelectAll()
 {
 POINT pt_start(0, 0);
 POINT pt_end=GetEndPoint();
-SetSelection(pt_end, pt_start);
+SetSelection(pt_start, pt_end);
+}
+
+VOID Input::SelectNone()
+{
+SetSelection(ptSelectionEnd, ptSelectionEnd);
+}
+
+VOID Input::SetFocus(FocusReason reason)
+{
+Interactive::SetFocus(reason);
+Application::Current->SetCurrentInput(this);
 }
 
 VOID Input::SetSelection(POINT const& pt_start, POINT const& pt_end)
@@ -839,9 +863,8 @@ if(edit_menu)
 	edit_menu->Delete->Visible=(!ReadOnly&&selection);
 	edit_menu->Paste->Visible=(!ReadOnly&&paste);
 	}
-POINT pt_frame=GetFrameOffset();
-pt+=pt_frame;
-ContextMenu->Show(this, pt);
+pt+=GetScreenOffset();
+ContextMenu->Show(pt);
 return true;
 }
 

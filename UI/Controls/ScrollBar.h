@@ -83,7 +83,7 @@ private:
 	VOID StopScrolling();
 	Handle<Timer> hScrollTimer;
 	INT iStep;
-	POINT ptStart;
+	POINT m_StartPoint;
 	ScrollBarButton uHighlight;
 	Orientation uOrientation;
 	UINT uStart;

@@ -9,14 +9,11 @@
 // Using
 //=======
 
-#include "Storage/Clipboard.h"
 #include "UI/Controls/Input.h"
 #include "UI/Controls/Menus/MenuBar.h"
 #include "UI/Controls/Menus/PopupMenu.h"
-#include "UI/Input/Shortcut.h"
 #include "Frame.h"
 
-using namespace Storage;
 using namespace UI::Controls;
 using namespace UI::Controls::Menus;
 using namespace UI::Input;
@@ -36,45 +33,18 @@ namespace UI {
 Frame::Frame():
 Window(nullptr),
 // Protected
-pPointerCapture(nullptr),
+m_PointerCapture(nullptr),
 // Private
-pCurrentMenu(nullptr),
-pFocus(nullptr),
-pOldFocus(nullptr),
-pPointerFocus(nullptr)
+m_Focus(nullptr),
+m_PointerFocus(nullptr)
 {
-Shortcuts=new ShortcutMap();
-ZeroMemory(pKeys, 256);
+ZeroMemory(m_Keys, 256);
 }
 
 
 //========
 // Common
 //========
-
-BOOL Frame::DoShortcut(KeyEventType type, Handle<KeyEventArgs> args)
-{
-if(type!=KeyEventType::KeyDown)
-	return false;
-BOOL alt=IsKeyDown(VirtualKey::Alt);
-BOOL ctrl=IsKeyDown(VirtualKey::Control);
-if(ctrl|alt)
-	{
-	BOOL shift=IsKeyDown(VirtualKey::Shift);
-	ShortcutFlags shortcut=(ShortcutFlags)args->Key;
-	SetFlag(shortcut, ShortcutFlags::Alt, alt);
-	SetFlag(shortcut, ShortcutFlags::Ctrl, ctrl);
-	SetFlag(shortcut, ShortcutFlags::Shift, shift);
-	auto control=Shortcuts->Get((UINT)shortcut);
-	if(control)
-		{
-		control->Clicked(control, nullptr);
-		args->Handled=true;
-		return true;
-		}
-	}
-return false;
-}
 
 Graphics::SIZE Frame::GetMinSize(RenderTarget* target)
 {
@@ -86,27 +56,16 @@ FLOAT scale=GetScaleFactor();
 return size.Max(MinSize*scale);
 }
 
-VOID Frame::Invalidate(BOOL rearrange)
-{
-if(GetFlag(uFlags, WindowFlags::Rearrange))
-	return;
-if(rearrange)
-	SetFlag(uFlags, WindowFlags::Rearrange);
-SetFlag(uFlags, WindowFlags::Repaint);
-Invalidated(this);
-}
-
 BOOL Frame::IsKeyDown(VirtualKey key)
 {
-return pKeys[(BYTE)key];
+return m_Keys[(BYTE)key];
 }
 
 VOID Frame::KillFocus()
 {
-ExitMenu();
 SetFocus(nullptr);
 SetPointerCapture(nullptr);
-ZeroMemory(pKeys, 256);
+ZeroMemory(m_Keys, 256);
 }
 
 VOID Frame::Rearrange(RenderTarget* target, RECT& rc)
@@ -129,106 +88,26 @@ for(it->MoveNext(); it->HasCurrent(); it->MoveNext())
 	}
 }
 
-VOID Frame::SetCurrentMenu(Menu* menu)
-{
-if(menu)
-	{
-	if(!pCurrentMenu)
-		{
-		pOldFocus=pFocus;
-		SetFocus(nullptr);
-		}
-	}
-else
-	{
-	if(pCurrentMenu)
-		{
-		SetFocus(pOldFocus);
-		pOldFocus=nullptr;
-		}
-	}
-pCurrentMenu=menu;
-}
-
 VOID Frame::SetFocus(Interactive* focus, FocusReason reason)
 {
-Current=this;
-if(pFocus==focus)
+if(m_Focus==focus)
 	return;
-if(pFocus)
-	pFocus->FocusLost(pFocus);
-pFocus=focus;
-if(pFocus)
-	pFocus->Focused(pFocus, reason);
+if(m_Focus)
+	m_Focus->FocusLost(m_Focus);
+m_Focus=focus;
+if(m_Focus)
+	m_Focus->Focused(m_Focus, reason);
 }
 
 VOID Frame::SetPointerFocus(Interactive* focus)
 {
-if(pPointerFocus==focus)
+if(m_PointerFocus==focus)
 	return;
-if(pPointerFocus)
-	pPointerFocus->PointerLeft(pPointerFocus);
-pPointerFocus=focus;
-if(pPointerFocus)
-	pPointerFocus->PointerEntered(pPointerFocus);
-}
-
-
-Frame* Frame::Current=nullptr;
-
-
-//======
-// Edit
-//======
-
-VOID Frame::EditCopy()
-{
-auto input=Convert<Controls::Input>(pFocus);
-if(!input)
-	return;
-auto clipboard=Clipboard::Open();
-auto text=input->GetSelection();
-clipboard->Copy(text);
-}
-
-VOID Frame::EditCut()
-{
-auto input=Convert<Controls::Input>(pOldFocus);
-if(!input)
-	return;
-auto clipboard=Clipboard::Open();
-auto text=input->GetSelection();
-clipboard->Copy(text);
-input->ReplaceSelection(nullptr);
-}
-
-VOID Frame::EditDelete()
-{
-auto input=Convert<Controls::Input>(pOldFocus);
-if(!input)
-	return;
-input->ReplaceSelection(nullptr);
-}
-
-VOID Frame::EditPaste()
-{
-auto input=Convert<Controls::Input>(pOldFocus);
-if(!input)
-	return;
-auto clipboard=Clipboard::Open();
-BOOL has=clipboard->HasText();
-auto text=clipboard->GetText();
-if(!text)
-	return;
-input->ReplaceSelection(text->Begin());
-}
-
-VOID Frame::EditSelectAll()
-{
-auto input=Convert<Controls::Input>(pOldFocus);
-if(!input)
-	return;
-input->SelectAll();
+if(m_PointerFocus)
+	m_PointerFocus->PointerLeft(m_PointerFocus);
+m_PointerFocus=focus;
+if(m_PointerFocus)
+	m_PointerFocus->PointerEntered(m_PointerFocus);
 }
 
 
@@ -239,12 +118,18 @@ input->SelectAll();
 BOOL Frame::DoKey(KeyEventType type, Handle<KeyEventArgs> args)
 {
 UpdateKeys(type, args->Key);
-if(DoShortcut(type, args))
-	return true;
+SetFlag(args->Flags, KeyEventFlags::Alt, IsKeyDown(VirtualKey::Alt));
+SetFlag(args->Flags, KeyEventFlags::Ctrl, IsKeyDown(VirtualKey::Control));
+SetFlag(args->Flags, KeyEventFlags::Shift, IsKeyDown(VirtualKey::Shift));
+if(type==KeyEventType::KeyDown)
+	{
+	if(Application::Current->Shortcut(args))
+		return true;
+	}
 KeyEvent(this, type, args);
 if(args->Handled)
 	return true;
-auto focus=Convert<Interactive>(pFocus);
+auto focus=Convert<Interactive>(m_Focus);
 if(focus)
 	{
 	switch(type)
@@ -260,34 +145,22 @@ if(focus)
 			break;
 			}
 		}
-	return args->Handled;
 	}
-if(pCurrentMenu)
-	pCurrentMenu->DoKey(type, args);
 return args->Handled;
 }
 
 VOID Frame::DoPointer(PointerEventType type, Handle<PointerEventArgs> args)
 {
 POINT pt(args->Point);
-if(pPointerCapture)
+if(m_PointerCapture)
 	{
-	POINT const& offset=pPointerCapture->GetFrameOffset();
+	POINT const& offset=m_PointerCapture->GetFrameOffset();
 	args->Point-=offset;
-	DoPointer(pPointerCapture, type, args);
+	DoPointer(m_PointerCapture, type, args);
 	args->Point=pt;
 	return;
 	}
 Interactive* focus=nullptr;
-if(pCurrentMenu)
-	{
-	BOOL inside=DoMenuPointer(type, args, &focus);
-	SetPointerFocus(focus);
-	if(inside)
-		return;
-	if(type!=PointerEventType::ButtonDown)
-		return;
-	}
 for(auto it=Children->Last(); it->HasCurrent(); it->MovePrevious())
 	{
 	auto child=it->GetCurrent();
@@ -347,30 +220,6 @@ for(auto it=children->First(); it->HasCurrent(); it->MoveNext())
 //================
 // Common Private
 //================
-
-BOOL Frame::DoMenuPointer(PointerEventType type, Handle<PointerEventArgs> args, Interactive** focus_ptr)
-{
-POINT pt(args->Point);
-Menu* menu=pCurrentMenu;
-BOOL inside=false;
-while(menu)
-	{
-	auto window=menu->Window;
-	POINT offset=window->GetFrameOffset();
-	args->Point-=offset;
-	inside|=DoPointer(window, type, args, focus_ptr);
-	args->Point=pt;
-	if(args->Handled)
-		return true;
-	menu=menu->GetParentMenu();
-	}
-if(type==PointerEventType::ButtonDown)
-	{
-	if(!inside)
-		ExitMenu();
-	}
-return inside;
-}
 
 VOID Frame::DoPointer(Interactive* control, PointerEventType type, Handle<PointerEventArgs> args)
 {
@@ -434,21 +283,12 @@ if(control)
 return inside;
 }
 
-VOID Frame::ExitMenu()
-{
-if(pCurrentMenu)
-	{
-	pCurrentMenu->Exit();
-	pCurrentMenu=nullptr;
-	}
-}
-
 VOID Frame::UpdateKeys(KeyEventType type, VirtualKey key)
 {
 BYTE set=0;
 if(type==KeyEventType::KeyDown)
 	set=1;
-pKeys[(BYTE)key]=set;
+m_Keys[(BYTE)key]=set;
 }
 
 VOID Frame::UpdateKeys(PointerEventType type, PointerButton button)

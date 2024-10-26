@@ -67,6 +67,7 @@ public:
 	// Arithmetik
 	inline RECT operator+(POINT const& Offset)const { return RECT(Left+Offset.Left, Top+Offset.Top, Right+Offset.Left, Bottom+Offset.Top); }
 	inline RECT operator*(FLOAT Scale)const { return RECT(Left*Scale, Top*Scale, Right*Scale, Bottom*Scale); }
+	inline RECT SetPosition(POINT const& Position)const { return RECT(Position.Left, Position.Top, Position.Left+GetWidth(), Position.Top+GetHeight()); }
 
 	// Common
 	INT Left;
