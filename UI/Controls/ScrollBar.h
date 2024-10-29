@@ -80,12 +80,12 @@ private:
 	VOID OnScrollTimer();
 	VOID StartScrolling(INT Step);
 	VOID StopScrolling();
-	Handle<Timer> hScrollTimer;
-	INT iStep;
+	ScrollBarButton m_Highlight;
+	Orientation m_Orientation;
+	Handle<Timer> m_ScrollTimer;
+	UINT m_Start;
 	POINT m_StartPoint;
-	ScrollBarButton uHighlight;
-	Orientation uOrientation;
-	UINT uStart;
+	INT m_Step;
 };
 
 }}

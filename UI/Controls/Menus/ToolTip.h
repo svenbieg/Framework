@@ -47,9 +47,9 @@ private:
 	VOID OnControlPointerLeft();
 	VOID OnTextChanged();
 	VOID OnTimerTriggered();
-	Handle<Panel> hPanel;
+	Interactive* m_Control;
+	Handle<Panel> m_Panel;
 	Handle<Timer> m_Timer;
-	Interactive* pControl;
 };
 
 }}}

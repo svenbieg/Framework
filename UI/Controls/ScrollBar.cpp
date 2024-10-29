@@ -34,11 +34,11 @@ Range(0),
 Step(10),
 Visibility(ScrollBarVisibility::Auto),
 Width(12),
-iStep(0),
-m_StartPoint(-1, -1),
-uHighlight(ScrollBarButton::None),
-uOrientation(orientation),
-uStart(0)
+m_Highlight(ScrollBarButton::None),
+m_Orientation(orientation),
+m_Step(0),
+m_Start(0),
+m_StartPoint(-1, -1)
 {
 PointerDown.Add(this, &ScrollBar::OnPointerDown);
 PointerLeft.Add(this, &ScrollBar::OnPointerLeft);
@@ -62,7 +62,7 @@ Graphics::SIZE ScrollBar::GetMinSize(RenderTarget* target)
 FLOAT scale=GetScaleFactor();
 UINT width=Width*scale;
 SIZE size(0, 0);
-switch(uOrientation)
+switch(m_Orientation)
 	{
 	case Orientation::Horizontal:
 		{
@@ -94,24 +94,24 @@ FLOAT scale=GetScaleFactor();
 UINT width=Width*scale;
 UINT padding=width*0.2f;
 UINT btn_size=width-3*padding;
-switch(uOrientation)
+switch(m_Orientation)
 	{
 	case Orientation::Horizontal:
 		{
-		auto color=(uHighlight==ScrollBarButton::First)? br_highlight: br_control;
+		auto color=(m_Highlight==ScrollBarButton::First)? br_highlight: br_control;
 		POINT pts[3];
 		pts[0].Set(rc.Left+padding, rc.Top+width/2);
 		pts[1].Set(rc.Left+padding+btn_size, rc.Top+padding);
 		pts[2].Set(rc.Left+padding+btn_size, rc.Bottom-padding);
 		target->FillPolygon(pts, 3, color);
-		color=(uHighlight==ScrollBarButton::Second)? br_highlight: br_control;
+		color=(m_Highlight==ScrollBarButton::Second)? br_highlight: br_control;
 		pts[0].Set(rc.Right-padding, rc.Top+width/2);
 		pts[1].Set(rc.Right-padding-btn_size, rc.Top+padding);
 		pts[2].Set(rc.Right-padding-btn_size, rc.Bottom-padding);
 		target->FillPolygon(pts, 3, color);
 		if(Fraction>0.f)
 			{
-			color=(uHighlight==ScrollBarButton::Bar)? br_highlight: br_control;
+			color=(m_Highlight==ScrollBarButton::Bar)? br_highlight: br_control;
 			UINT size=rc.Right-2*width;
 			UINT bar=size*Fraction;
 			bar=Max(bar, width);
@@ -128,20 +128,20 @@ switch(uOrientation)
 		}
 	case Orientation::Vertical:
 		{
-		auto color=(uHighlight==ScrollBarButton::First)? br_highlight: br_control;
+		auto color=(m_Highlight==ScrollBarButton::First)? br_highlight: br_control;
 		POINT pts[3];
 		pts[0].Set(rc.Left+width/2, rc.Top+padding);
 		pts[1].Set(rc.Left+padding, rc.Top+padding+btn_size);
 		pts[2].Set(rc.Right-padding, rc.Top+padding+btn_size);
 		target->FillPolygon(pts, 3, color);
-		color=(uHighlight==ScrollBarButton::Second)? br_highlight: br_control;
+		color=(m_Highlight==ScrollBarButton::Second)? br_highlight: br_control;
 		pts[0].Set(rc.Left+width/2, rc.Bottom-padding);
 		pts[1].Set(rc.Left+padding, rc.Bottom-padding-btn_size);
 		pts[2].Set(rc.Right-padding, rc.Bottom-padding-btn_size);
 		target->FillPolygon(pts, 3, color);
 		if(Fraction>0.f)
 			{
-			color=(uHighlight==ScrollBarButton::Bar)? br_highlight: br_control;
+			color=(m_Highlight==ScrollBarButton::Bar)? br_highlight: br_control;
 			UINT size=rc.Bottom-2*width;
 			UINT bar=size*Fraction;
 			bar=Max(bar, width);
@@ -168,7 +168,7 @@ ScrollBarButton ScrollBar::GetButton(POINT const& pt)
 {
 FLOAT scale=GetScaleFactor();
 UINT width=Width*scale;
-switch(uOrientation)
+switch(m_Orientation)
 	{
 	case Orientation::Horizontal:
 		{
@@ -210,7 +210,7 @@ switch(button)
 		}
 	case ScrollBarButton::Bar:
 		{
-		uStart=Position;
+		m_Start=Position;
 		m_StartPoint=pt;
 		CapturePointer();
 		args->Handled=true;
@@ -225,9 +225,9 @@ switch(button)
 
 VOID ScrollBar::OnPointerLeft()
 {
-if(uHighlight==ScrollBarButton::None)
+if(m_Highlight==ScrollBarButton::None)
 	return;
-uHighlight=ScrollBarButton::None;
+m_Highlight=ScrollBarButton::None;
 Invalidate();
 }
 
@@ -237,9 +237,9 @@ POINT const& pt=args->Point;
 if(m_StartPoint.Left==-1)
 	{
 	auto highlight=GetButton(args->Point);
-	if(uHighlight!=highlight)
+	if(m_Highlight!=highlight)
 		{
-		uHighlight=highlight;
+		m_Highlight=highlight;
 		Invalidate();
 		}
 	args->Handled=true;
@@ -247,7 +247,7 @@ if(m_StartPoint.Left==-1)
 	}
 INT start=0;
 INT pos=0;
-switch(uOrientation)
+switch(m_Orientation)
 	{
 	case Orientation::Horizontal:
 		{
@@ -264,7 +264,7 @@ switch(uOrientation)
 	}
 INT move=pos-start;
 move/=Fraction;
-pos=(INT)uStart+move;
+pos=(INT)m_Start+move;
 if(pos<0)
 	pos=Max(pos, 0);
 pos=Min(pos, (INT)Range);
@@ -286,7 +286,7 @@ if(m_StartPoint.Left!=-1)
 
 VOID ScrollBar::OnScrollTimer()
 {
-INT pos=Position+iStep;
+INT pos=Position+m_Step;
 pos=Max(pos, 0);
 pos=Min(pos, (INT)Range);
 if(Position==pos)
@@ -296,24 +296,24 @@ if(Position==pos)
 	}
 Position=pos;
 Scrolled(this);
-if(!hScrollTimer)
+if(!m_ScrollTimer)
 	{
-	hScrollTimer=new Timer();
-	hScrollTimer->Triggered.Add(this, &ScrollBar::OnScrollTimer);
-	hScrollTimer->StartPeriodic(100);
+	m_ScrollTimer=new Timer();
+	m_ScrollTimer->Triggered.Add(this, &ScrollBar::OnScrollTimer);
+	m_ScrollTimer->StartPeriodic(100);
 	}
 }
 
 VOID ScrollBar::StartScrolling(INT step)
 {
-iStep=step;
+m_Step=step;
 OnScrollTimer();
 }
 
 VOID ScrollBar::StopScrolling()
 {
-hScrollTimer=nullptr;
-iStep=0;
+m_ScrollTimer=nullptr;
+m_Step=0;
 }
 
 }}

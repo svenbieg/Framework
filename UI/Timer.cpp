@@ -29,8 +29,8 @@ namespace UI {
 //==================
 
 Timer::Timer():
-iInterval(0),
-uLastTime(0)
+m_Interval(0),
+m_LastTime(0)
 {}
 
 Timer::~Timer()
@@ -45,41 +45,41 @@ Stop();
 
 VOID Timer::Reset()
 {
-uLastTime=GetTickCount64();
+m_LastTime=GetTickCount64();
 }
 
 VOID Timer::StartOnce(UINT ms)
 {
-if(iInterval!=0)
+if(m_Interval!=0)
 	Stop();
 if(ms==0)
 	return;
-iInterval=ms;
-uLastTime=GetTickCount64();
+m_Interval=ms;
+m_LastTime=GetTickCount64();
 auto clock=Clock::Get();
 clock->Tick.Add(this, &Timer::OnClockTick);
 }
 
 VOID Timer::StartPeriodic(UINT ms)
 {
-if(iInterval!=0)
+if(m_Interval!=0)
 	Stop();
 if(ms==0)
 	return;
-iInterval=-(INT)ms;
-uLastTime=GetTickCount64();
+m_Interval=-(INT)ms;
+m_LastTime=GetTickCount64();
 auto clock=Clock::Get();
 clock->Tick.Add(this, &Timer::OnClockTick);
 }
 
 VOID Timer::Stop()
 {
-if(iInterval==0)
+if(m_Interval==0)
 	return;
 auto clock=Clock::Get();
 clock->Tick.Remove(this);
-iInterval=0;
-uLastTime=0;
+m_Interval=0;
+m_LastTime=0;
 }
 
 
@@ -95,14 +95,14 @@ Triggered(this);
 VOID Timer::OnClockTick()
 {
 UINT64 time=GetTickCount64();
-UINT dt=iInterval>0? iInterval: -iInterval;
-if(time<uLastTime+dt)
+UINT dt=m_Interval>0? m_Interval: -m_Interval;
+if(time<m_LastTime+dt)
 	return;
-uLastTime=time;
+m_LastTime=time;
 auto app=Application::Current;
 if(app)
 	app->Dispatch(this, &Timer::DoTrigger);
-if(iInterval>0)
+if(m_Interval>0)
 	Stop();
 }
 

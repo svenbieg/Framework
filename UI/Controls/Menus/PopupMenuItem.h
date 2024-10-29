@@ -70,12 +70,12 @@ private:
 	VOID OnPointerEntered();
 	VOID OnPointerLeft();
 	VOID OnTimerTriggered();
-	Handle<Bitmap> hIcon;
-	Handle<Bitmap> hIconDisabled;
+	Handle<Bitmap> m_Icon;
+	Handle<Bitmap> m_IconDisabled;
+	UINT m_IconWidth;
+	UINT m_LabelWidth;
+	UINT m_ShortcutWidth;
 	Handle<Timer> m_Timer;
-	UINT uIconWidth;
-	UINT uLabelWidth;
-	UINT uShortcutWidth;
 };
 
 }}}
