@@ -9,9 +9,9 @@
 // Using
 //=======
 
+#include "Devices/Timers/Timer.h"
 #include "UI/Controls/Interactive.h"
 #include "UI/Controls/Panel.h"
-#include "UI/Timer.h"
 #include "Sentence.h"
 
 
@@ -31,6 +31,9 @@ namespace UI {
 class ToolTip: public Object
 {
 public:
+	// Using
+	using Timer=Devices::Timers::Timer;
+
 	// Con-/Destructors
 	ToolTip(Interactive* Control, Handle<Sentence> Text=nullptr);
 	~ToolTip();

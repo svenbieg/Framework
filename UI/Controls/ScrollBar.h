@@ -10,7 +10,6 @@
 //=======
 
 #include "UI/Orientation.h"
-#include "UI/Timer.h"
 #include "Interactive.h"
 
 
@@ -56,6 +55,7 @@ class ScrollBar: public Interactive
 public:
 	// Con-/Destructors
 	ScrollBar(Window* Parent, Orientation Orientation=Orientation::Horizontal);
+	~ScrollBar();
 
 	// Common
 	Handle<Brush> GetBackgroundBrush()override;
@@ -77,12 +77,11 @@ private:
 	VOID OnPointerLeft();
 	VOID OnPointerMoved(Handle<PointerEventArgs> Args);
 	VOID OnPointerUp(Handle<PointerEventArgs> Args);
-	VOID OnScrollTimer();
+	VOID OnSystemTimer();
 	VOID StartScrolling(INT Step);
 	VOID StopScrolling();
 	ScrollBarButton m_Highlight;
 	Orientation m_Orientation;
-	Handle<Timer> m_ScrollTimer;
 	UINT m_Start;
 	POINT m_StartPoint;
 	INT m_Step;

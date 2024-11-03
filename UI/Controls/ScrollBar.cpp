@@ -9,8 +9,10 @@
 // Using
 //=======
 
+#include "Devices/Timers/Clock.h"
 #include "ScrollBar.h"
 
+using namespace Devices::Timers;
 using namespace Graphics;
 
 
@@ -44,6 +46,11 @@ PointerDown.Add(this, &ScrollBar::OnPointerDown);
 PointerLeft.Add(this, &ScrollBar::OnPointerLeft);
 PointerMoved.Add(this, &ScrollBar::OnPointerMoved);
 PointerUp.Add(this, &ScrollBar::OnPointerUp);
+}
+
+ScrollBar::~ScrollBar()
+{
+StopScrolling();
 }
 
 
@@ -284,7 +291,7 @@ if(m_StartPoint.Left!=-1)
 	}
 }
 
-VOID ScrollBar::OnScrollTimer()
+VOID ScrollBar::OnSystemTimer()
 {
 INT pos=Position+m_Step;
 pos=Max(pos, 0);
@@ -296,23 +303,19 @@ if(Position==pos)
 	}
 Position=pos;
 Scrolled(this);
-if(!m_ScrollTimer)
-	{
-	m_ScrollTimer=new Timer();
-	m_ScrollTimer->Triggered.Add(this, &ScrollBar::OnScrollTimer);
-	m_ScrollTimer->StartPeriodic(100);
-	}
 }
 
 VOID ScrollBar::StartScrolling(INT step)
 {
+auto clock=SystemTimer::Open();
+clock->Tick.Remove(this);
+clock->Tick.Add(this, &ScrollBar::OnSystemTimer);
 m_Step=step;
-OnScrollTimer();
 }
 
 VOID ScrollBar::StopScrolling()
 {
-m_ScrollTimer=nullptr;
+SystemTimer::Open()->Tick.Remove(this);
 m_Step=0;
 }
 

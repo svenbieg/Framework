@@ -86,7 +86,7 @@ public:
 	VOID SetBlue(BYTE Blue);
 	VOID SetBrightness(FLOAT Brightness);
 	VOID SetGreen(BYTE Green);
-	VOID SetMonochrome(BOOL Monochrome);
+	VOID SetMonochrome(BOOL m_Monochrome);
 	VOID SetRed(BYTE Red);
 
 private:

@@ -9,10 +9,10 @@
 // Using
 //=======
 
+#include "Devices/Timers/Timer.h"
 #include "Graphics/Icon.h"
 #include "UI/Controls/Interactive.h"
 #include "UI/Controls/TextBlock.h"
-#include "UI/Timer.h"
 #include "MenuItem.h"
 #include "Sentence.h"
 
@@ -43,6 +43,7 @@ public:
 	// Using
 	using Bitmap=Graphics::Bitmap;
 	using KeyEventArgs=UI::Input::KeyEventArgs;
+	using Timer=Devices::Timers::Timer;
 
 	// Con-/Destructors
 	PopupMenuItem(PopupMenu* PopupMenu, Handle<Sentence> Label);
