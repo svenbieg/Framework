@@ -121,7 +121,7 @@ Graphics::RECT Input::GetCursorRect()
 {
 FLOAT scale=GetScaleFactor();
 POINT pt_cursor=PointFromChar(m_CursorPos, scale);
-if(GetFlag(m_InputFlags, InputFlags::Pointing))
+if(FlagHelper::Get(m_InputFlags, InputFlags::Pointing))
 	pt_cursor=m_PointerPos;
 UINT line_height=m_LineHeight*scale;
 RECT rc_cursor(pt_cursor.Left, pt_cursor.Top, pt_cursor.Left, pt_cursor.Top+line_height);
@@ -643,9 +643,9 @@ Invalidate();
 VOID Input::OnFocusLost()
 {
 ShowCursor(false);
-if(GetFlag(m_InputFlags, InputFlags::Pointing))
+if(FlagHelper::Get(m_InputFlags, InputFlags::Pointing))
 	{
-	ClearFlag(m_InputFlags, InputFlags::Pointing);
+	FlagHelper::Clear(m_InputFlags, InputFlags::Pointing);
 	ReleasePointer();
 	m_PointerPos.Set(0, 0);
 	}
@@ -670,7 +670,7 @@ if(args->Char)
 	return;
 	}
 VirtualKey key=args->Key;
-BOOL shift=GetFlag(m_InputFlags, InputFlags::Shift);
+BOOL shift=FlagHelper::Get(m_InputFlags, InputFlags::Shift);
 switch(key)
 	{
 	case VirtualKey::Back:
@@ -730,7 +730,7 @@ switch(key)
 		}
 	case VirtualKey::Shift:
 		{
-		SetFlag(m_InputFlags, InputFlags::Shift);
+		FlagHelper::Set(m_InputFlags, InputFlags::Shift);
 		args->Handled=true;
 		break;
 		}
@@ -749,7 +749,7 @@ switch(args->Key)
 	{
 	case VirtualKey::Shift:
 		{
-		ClearFlag(m_InputFlags, InputFlags::Shift);
+		FlagHelper::Clear(m_InputFlags, InputFlags::Shift);
 		args->Handled=true;
 		break;
 		}
@@ -762,7 +762,7 @@ SetFocus(FocusReason::Pointer);
 if(args->Button==PointerButton::Wheel)
 	return;
 if(args->Button==PointerButton::Left)
-	SetFlag(m_InputFlags, InputFlags::Pointing);
+	FlagHelper::Set(m_InputFlags, InputFlags::Pointing);
 m_PointerPos=args->Point;
 CapturePointer();
 BOOL selection=false;
@@ -778,7 +778,7 @@ args->Handled=true;
 
 VOID Input::OnPointerMoved(Handle<PointerEventArgs> args)
 {
-if(!GetFlag(m_InputFlags, InputFlags::Pointing))
+if(!FlagHelper::Get(m_InputFlags, InputFlags::Pointing))
 	return;
 m_PointerPos=args->Point;
 UpdatePointer();
@@ -795,7 +795,7 @@ switch(args->Button)
 	{
 	case PointerButton::Left:
 		{
-		ClearFlag(m_InputFlags, InputFlags::Pointing);
+		FlagHelper::Clear(m_InputFlags, InputFlags::Pointing);
 		m_PointerPos=args->Point;
 		UpdatePointer();
 		break;

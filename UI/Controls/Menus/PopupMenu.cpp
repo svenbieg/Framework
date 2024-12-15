@@ -152,7 +152,7 @@ Application::Current->SetCurrentMenu(this);
 BOOL keyboard=false;
 if(m_ParentMenu)
 	keyboard|=m_ParentMenu->HasKeyboardAccess();
-SetFlag(m_MenuFlags, MenuFlags::KeyboardAccess, keyboard);
+FlagHelper::Set(m_MenuFlags, MenuFlags::KeyboardAccess, keyboard);
 RECT rc(pt.Left, pt.Top, pt.Left, pt.Top);
 Move(rc);
 Visible=true;
