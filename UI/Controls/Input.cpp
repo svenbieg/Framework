@@ -12,7 +12,7 @@
 #include "Concurrency/MainTask.h"
 #include "Storage/Clipboard.h"
 #include "Storage/Streams/StreamReader.h"
-#include "Storage/StaticBuffer.h"
+#include "Storage/Buffer.h"
 #include "UI/Controls/Menus/EditMenu.h"
 #include "UI/Application.h"
 #include "Input.h"
@@ -146,7 +146,7 @@ if(width_count>0)
 	size.Width*=scale;
 	}
 m_LineHeight=GetLineHeight(target, 1.f);
-UINT line_count=Max(m_Lines.get_count(), 1U);
+UINT line_count=TypeHelper::Max(m_Lines.get_count(), 1U);
 UINT line_height=m_LineHeight*scale;
 size.Height=line_count*line_height;
 size.AddPadding(Padding*scale);
@@ -437,7 +437,7 @@ if(!text)
 	Clear();
 	return;
 	}
-Handle<StaticBuffer> buf=new StaticBuffer(text->Begin());
+Handle<Buffer> buf=new Buffer(text->Begin(), 0, BufferOptions::Static);
 ReadFromStream(buf);
 }
 
@@ -573,8 +573,8 @@ UINT line_count=m_Lines.get_count();
 if(line_count==0)
 	return;
 INT line_id=m_CursorPos.Top+y;
-line_id=Max(line_id, 0);
-line_id=Min(line_id, (INT)line_count-1);
+line_id=TypeHelper::Max(line_id, 0);
+line_id=TypeHelper::Min(line_id, (INT)line_count-1);
 auto it=m_Lines.cbegin(line_id);
 INPUT_LINE const& line=it.get_current();
 UINT line_len=line.Offsets.get_count();
@@ -959,16 +959,16 @@ UpdateSelection();
 
 VOID Input::UpdateSelection()
 {
-UINT start_line=Min(m_SelectionStart.Top, m_SelectionEnd.Top);
-UINT end_line=Max(m_SelectionStart.Top, m_SelectionEnd.Top);
+UINT start_line=TypeHelper::Min(m_SelectionStart.Top, m_SelectionEnd.Top);
+UINT end_line=TypeHelper::Max(m_SelectionStart.Top, m_SelectionEnd.Top);
 UINT start_char=0;
 UINT end_char=0;
 BOOL reverse=false;
 if(start_line==end_line)
 	{
 	reverse=m_SelectionStart.Left>m_SelectionEnd.Left;
-	start_char=Min(m_SelectionStart.Left, m_SelectionEnd.Left);
-	end_char=Max(m_SelectionStart.Left, m_SelectionEnd.Left);
+	start_char=TypeHelper::Min(m_SelectionStart.Left, m_SelectionEnd.Left);
+	end_char=TypeHelper::Max(m_SelectionStart.Left, m_SelectionEnd.Left);
 	}
 else if(start_line==m_SelectionStart.Top)
 	{

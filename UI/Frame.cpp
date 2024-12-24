@@ -38,7 +38,7 @@ m_PointerCapture(nullptr),
 // Private
 m_Focus(nullptr)
 {
-ZeroMemory(m_Keys, 256);
+MemoryHelper::Fill(m_Keys, 256, 0);
 }
 
 
@@ -73,7 +73,7 @@ VOID Frame::KillFocus()
 {
 SetFocus(nullptr);
 SetPointerCapture(nullptr);
-ZeroMemory(m_Keys, 256);
+MemoryHelper::Fill(m_Keys, 256, 0);
 }
 
 VOID Frame::Rearrange(RenderTarget* target, RECT& rc)

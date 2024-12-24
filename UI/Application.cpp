@@ -9,12 +9,14 @@
 // Using
 //=======
 
+#include "Concurrency/DispatchedQueue.h"
 #include "Storage/Clipboard.h"
 #include "UI/Controls/Input.h"
 #include "UI/Input/Shortcut.h"
 #include "Application.h"
 #include "Frame.h"
 
+using namespace Concurrency;
 using namespace Storage;
 using namespace UI::Input;
 
@@ -39,6 +41,11 @@ if(m_CurrentMenu)
 	m_CurrentMenu->Exit();
 	m_CurrentMenu=nullptr;
 	}
+}
+
+VOID Application::Quit()
+{
+DispatchedQueue::Exit();
 }
 
 VOID Application::SetCurrentInput(Input* input)
@@ -138,10 +145,10 @@ m_CurrentInput->SelectAll();
 // Con-/Destructors Protected
 //============================
 
-Application::Application(LPCSTR name):
-Core::Application(name),
+Application::Application(Handle<Sentence> name):
 m_CurrentInput(nullptr),
 m_CurrentMenu(nullptr),
+m_Name(name),
 m_PointerFocus(nullptr)
 {
 Current=this;

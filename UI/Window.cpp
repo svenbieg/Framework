@@ -90,8 +90,8 @@ for(auto it=Children->First(); it->HasCurrent(); it->MoveNext())
 	auto control=Convert<Control>(child);
 	if(control)
 		child_size.AddPadding(control->Margin*scale);
-	size.Width=Max(size.Width, child_size.Width);
-	size.Height=Max(size.Height, child_size.Height);
+	size.Width=TypeHelper::Max(size.Width, child_size.Width);
+	size.Height=TypeHelper::Max(size.Height, child_size.Height);
 	}
 return size.Max(MinSize*scale);
 }
