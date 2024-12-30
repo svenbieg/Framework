@@ -27,21 +27,6 @@ using namespace UI::Input;
 namespace UI {
 
 
-//==================
-// Con-/Destructors
-//==================
-
-Frame::Frame():
-Window(nullptr),
-// Protected
-m_PointerCapture(nullptr),
-// Private
-m_Focus(nullptr)
-{
-MemoryHelper::Fill(m_Keys, 256, 0);
-}
-
-
 //========
 // Common
 //========
@@ -73,7 +58,7 @@ VOID Frame::KillFocus()
 {
 SetFocus(nullptr);
 SetPointerCapture(nullptr);
-MemoryHelper::Fill(m_Keys, 256, 0);
+MemoryHelper::Fill(m_Keys, sizeof(m_Keys), 0);
 }
 
 VOID Frame::Rearrange(RenderTarget* target, RECT& rc)
@@ -108,6 +93,21 @@ if(m_Focus)
 }
 
 
+//============================
+// Con-/Destructors Protected
+//============================
+
+Frame::Frame():
+Window(nullptr),
+// Protected
+m_PointerCapture(nullptr),
+// Private
+m_Focus(nullptr)
+{
+MemoryHelper::Fill(m_Keys, sizeof(m_Keys), 0);
+}
+
+
 //==================
 // Common Protected
 //==================
@@ -120,13 +120,13 @@ FlagHelper::Set(args->Flags, KeyEventFlags::Ctrl, IsKeyDown(VirtualKey::Control)
 FlagHelper::Set(args->Flags, KeyEventFlags::Shift, IsKeyDown(VirtualKey::Shift));
 if(type==KeyEventType::KeyDown)
 	{
-	if(Application::Current->Shortcut(args))
+	if(Application::Get()->Shortcut(args))
 		return true;
 	}
 KeyEvent(this, type, args);
 if(args->Handled)
 	return true;
-auto focus=Convert<Interactive>(m_Focus);
+auto focus=dynamic_cast<Interactive*>(m_Focus);
 if(focus)
 	{
 	switch(type)
@@ -175,7 +175,7 @@ for(auto it=Children->Last(); it->HasCurrent(); it->MovePrevious())
 	if(args->Handled)
 		break;
 	}
-Application::Current->SetPointerFocus(focus);
+Application::Get()->SetPointerFocus(focus);
 }
 
 VOID Frame::RenderWindow(Window* window, RenderTarget* target, RECT const& rc, BOOL override)
@@ -267,7 +267,7 @@ for(auto it=window->Children->Last(); it->HasCurrent(); it->MovePrevious())
 	if(args->Handled)
 		return true;
 	}
-auto control=Convert<Interactive>(window);
+auto control=dynamic_cast<Interactive*>(window);
 if(control)
 	{
 	if(control->IsEnabled())

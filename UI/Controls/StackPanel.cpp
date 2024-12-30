@@ -20,21 +20,6 @@ namespace UI {
 	namespace Controls {
 
 
-//==================
-// Con-/Destructors
-//==================
-
-StackPanel::StackPanel(Orientation orientation):
-StackPanel(nullptr, orientation)
-{}
-
-StackPanel::StackPanel(Window* parent, Orientation orientation):
-Panel(parent),
-AlignChildren(Alignment::Default),
-m_Orientation(orientation)
-{}
-
-
 //========
 // Common
 //========
@@ -49,7 +34,7 @@ for(auto it=Children->First(); it->HasCurrent(); it->MoveNext())
 	if(!child->Visible)
 		continue;
 	SIZE child_size=child->GetMinSize(target);
-	auto control=Convert<Control>(child);
+	auto control=child.As<Control>();
 	if(control)
 		{
 		RECT const& margin=control->Margin;
@@ -87,7 +72,7 @@ for(auto it=Children->First(); it->HasCurrent(); it->MoveNext())
 	if(!child->Visible)
 		continue;
 	SIZE child_size=child->GetMinSize(target);
-	auto control=Convert<Control>(child);
+	auto control=child.As<Control>();
 	if(control)
 		{
 		RECT const& margin=control->Margin;
@@ -152,5 +137,16 @@ for(auto it=Children->First(); it->HasCurrent(); it->MoveNext())
 		}
 	}
 }
+
+
+//============================
+// Con-/Destructors Protected
+//============================
+
+StackPanel::StackPanel(Window* parent, Orientation orientation):
+Panel(parent),
+AlignChildren(Alignment::Default),
+m_Orientation(orientation)
+{}
 
 }}

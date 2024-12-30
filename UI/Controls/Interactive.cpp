@@ -21,27 +21,6 @@ namespace UI {
 	namespace Controls {
 
 
-//==================
-// Con-/Destructors
-//==================
-
-Interactive::Interactive(Window* parent):
-Control(parent),
-Enabled(this, true),
-TabStop(false),
-m_InteractiveFlags(InteractiveFlags::None)
-{
-Enabled.Changed.Add(this, &Interactive::OnEnabledChanged);
-Focused.Add(this, &Interactive::OnFocused);
-FocusLost.Add(this, &Interactive::OnFocusLost);
-KeyDown.Add(this, &Interactive::OnKeyDown);
-PointerDown.Add(this, &Interactive::OnPointerDown);
-PointerEntered.Add(this, &Interactive::OnPointerEntered);
-PointerLeft.Add(this, &Interactive::OnPointerLeft);
-PointerUp.Add(this, &Interactive::OnPointerUp);
-}
-
-
 //========
 // Common
 //========
@@ -74,7 +53,7 @@ return frame->GetFocus()==this;
 
 BOOL Interactive::HasPointerFocus()
 {
-return Application::Current->GetPointerFocus()==this;
+return Application::Get()->GetPointerFocus()==this;
 }
 
 BOOL Interactive::IsCapturingPointer()
@@ -90,7 +69,7 @@ if(!Enabled)
 Window* parent=Parent;
 while(parent)
 	{
-	auto interactive=Convert<Interactive>(parent);
+	auto interactive=dynamic_cast<Interactive*>(parent);
 	if(interactive)
 		{
 		if(!interactive->Enabled)
@@ -121,6 +100,27 @@ VOID Interactive::SetFocus(FocusReason reason)
 {
 auto frame=GetFrame();
 frame->SetFocus(this, reason);
+}
+
+
+//============================
+// Con-/Destructors Protected
+//============================
+
+Interactive::Interactive(Window* parent):
+Control(parent),
+Enabled(this, true),
+TabStop(false),
+m_InteractiveFlags(InteractiveFlags::None)
+{
+Enabled.Changed.Add(this, &Interactive::OnEnabledChanged);
+Focused.Add(this, &Interactive::OnFocused);
+FocusLost.Add(this, &Interactive::OnFocusLost);
+KeyDown.Add(this, &Interactive::OnKeyDown);
+PointerDown.Add(this, &Interactive::OnPointerDown);
+PointerEntered.Add(this, &Interactive::OnPointerEntered);
+PointerLeft.Add(this, &Interactive::OnPointerLeft);
+PointerUp.Add(this, &Interactive::OnPointerUp);
 }
 
 
@@ -163,7 +163,7 @@ for(; it->HasCurrent(); it->Move(fwd, repeat))
 	auto child=it->GetCurrent();
 	if(!child->Visible)
 		continue;
-	auto interactive=Convert<Interactive>(child);
+	auto interactive=child.As<Interactive>();
 	if(interactive)
 		{
 		if(!interactive->Enabled)

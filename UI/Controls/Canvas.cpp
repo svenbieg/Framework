@@ -20,15 +20,6 @@ namespace UI {
 	namespace Controls {
 
 
-//==================
-// Con-/Destructors
-//==================
-
-Canvas::Canvas(Window* parent):
-Control(parent)
-{}
-
-
 //========
 // Common
 //========
@@ -44,7 +35,7 @@ for(auto it=Children->First(); it->HasCurrent(); it->MoveNext())
 	RECT const& rc=child->GetRect();
 	UINT right=rc.Right;
 	UINT bottom=rc.Bottom;
-	auto control=Convert<Control>(child);
+	auto control=child.As<Control>();
 	if(control)
 		{
 		RECT const& margin=control->Margin;

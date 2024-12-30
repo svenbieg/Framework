@@ -37,7 +37,7 @@ public:
 		};
 
 	// Con-/Destructors
-	TabView(Window* Parent=nullptr);
+	static inline Handle<TabView> Create(Window* Parent) { return new TabView(Parent); }
 
 	// Common
 	Handle<TabInfo> AddTab(Window* Tab);
@@ -46,6 +46,9 @@ public:
 private:
 	// Using
 	using TabMap=Collections::Map<Window*, Handle<TabInfo>>;
+
+	// Con-/Destructors
+	TabView(Window* Parent);
 
 	// Common
 	Handle<TabMap> m_Tabs;

@@ -87,7 +87,7 @@ for(auto it=Children->First(); it->HasCurrent(); it->MoveNext())
 	if(!child->Visible)
 		continue;
 	SIZE child_size=child->GetMinSize(target);
-	auto control=Convert<Control>(child);
+	auto control=child.As<Control>();
 	if(control)
 		child_size.AddPadding(control->Margin*scale);
 	size.Width=TypeHelper::Max(size.Width, child_size.Width);
@@ -260,7 +260,7 @@ m_Rect(0, 0, 0, 0),
 // Private
 m_OldParent(parent)
 {
-Children=new ChildList();
+Children=ChildList::Create();
 Parent.Changed.Add(this, &Window::OnParentChanged);
 Visible.Changed.Add(this, &Window::OnVisibleChanged);
 if(Parent)

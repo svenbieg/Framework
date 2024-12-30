@@ -43,7 +43,7 @@ public:
 	using VirtualKey=UI::Input::VirtualKey;
 
 	// Con-/Destructors
-	Frame();
+	static inline Handle<Frame> Create() { return new Frame(); }
 
 	// Common
 	Handle<Interactive> GetFocus()const { return m_Focus; }
@@ -64,6 +64,9 @@ public:
 	virtual VOID SetPointerCapture(Interactive* Capture) { m_PointerCapture=Capture; }
 
 protected:
+	// Con-/Destructors
+	Frame();
+
 	// Common
 	BOOL DoKey(KeyEventType Type, Handle<KeyEventArgs> Args);
 	VOID DoPointer(PointerEventType Type, Handle<PointerEventArgs> Args);
