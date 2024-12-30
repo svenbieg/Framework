@@ -159,6 +159,7 @@ m_CurrentMenu(nullptr),
 m_Name(name),
 m_PointerFocus(nullptr)
 {
+s_Current=this;
 Shortcuts=ShortcutMap::Create();
 }
 

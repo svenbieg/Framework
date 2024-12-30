@@ -39,7 +39,7 @@ public:
 
 	// Con-/Destructors
 	~Application();
-	static inline Application* Get() { assert(s_Current); return s_Current; }
+	static inline Application* Get() { return s_Current; }
 
 	// Common
 	VOID ExitMenu();
