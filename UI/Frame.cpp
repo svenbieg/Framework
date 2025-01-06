@@ -63,7 +63,7 @@ MemoryHelper::Fill(m_Keys, sizeof(m_Keys), 0);
 
 VOID Frame::Rearrange(RenderTarget* target, RECT& rc)
 {
-auto it=Children->First();
+auto it=Children->Begin();
 auto content=it->GetCurrent();
 if(!content)
 	return;
@@ -158,7 +158,7 @@ if(m_PointerCapture)
 	return;
 	}
 Interactive* focus=nullptr;
-for(auto it=Children->Last(); it->HasCurrent(); it->MovePrevious())
+for(auto it=Children->End(); it->HasCurrent(); it->MovePrevious())
 	{
 	auto child=it->GetCurrent();
 	if(!child->Visible)
@@ -200,7 +200,7 @@ if(repaint)
 		}
 	}
 auto children=window->Children;
-for(auto it=children->First(); it->HasCurrent(); it->MoveNext())
+for(auto it=children->Begin(); it->HasCurrent(); it->MoveNext())
 	{
 	auto child=it->GetCurrent();
 	if(!child->Visible)
@@ -249,7 +249,7 @@ BOOL Frame::DoPointer(Window* window, PointerEventType type, Handle<PointerEvent
 {
 POINT pt(args->Point);
 BOOL inside=false;
-for(auto it=window->Children->Last(); it->HasCurrent(); it->MovePrevious())
+for(auto it=window->Children->End(); it->HasCurrent(); it->MovePrevious())
 	{
 	auto child=it->GetCurrent();
 	if(!child->Visible)

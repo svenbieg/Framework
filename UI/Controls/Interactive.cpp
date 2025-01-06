@@ -37,7 +37,7 @@ if(!window)
 	{
 	if(!control)
 		return nullptr;
-	window=control->Parent;
+	window=control->m_Parent;
 	}
 Interactive* next=nullptr;
 BOOL fwd=(relative>=0);
@@ -66,7 +66,7 @@ BOOL Interactive::IsEnabled()
 {
 if(!Enabled)
 	return false;
-Window* parent=Parent;
+Window* parent=m_Parent;
 while(parent)
 	{
 	auto interactive=dynamic_cast<Interactive*>(parent);
@@ -75,7 +75,7 @@ while(parent)
 		if(!interactive->Enabled)
 			return false;
 		}
-	parent=parent->Parent;
+	parent=parent->GetParent();
 	}
 return true;
 }
@@ -130,7 +130,7 @@ PointerUp.Add(this, &Interactive::OnPointerUp);
 
 BOOL Interactive::GetNext(Window* window, Interactive* control, Interactive** next_ptr, INT* relative_ptr, BOOL fwd, UINT level)
 {
-auto it=window->Children->First();
+auto it=window->Children->Begin();
 if(!it->HasCurrent())
 	return false;
 BOOL repeat=(level==0);
@@ -155,7 +155,7 @@ if(control)
 else
 	{
 	if(!fwd)
-		it->Last();
+		it->End();
 	}
 INT dir=(fwd? 1: -1);
 for(; it->HasCurrent(); it->Move(fwd, repeat))

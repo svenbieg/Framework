@@ -247,7 +247,7 @@ switch(args->Key)
 	{
 	case VirtualKey::Down:
 		{
-		auto control=Interactive::GetNextControl(Parent, this, 1);
+		auto control=Interactive::GetNextControl(m_Parent, this, 1);
 		if(control)
 			{
 			auto item=dynamic_cast<MenuItem*>(control);
@@ -270,14 +270,14 @@ switch(args->Key)
 		auto menubar=dynamic_cast<MenuBar*>(parent_menu->GetPanel());
 		if(menubar)
 			{
-			auto control=Interactive::GetNextControl(Parent, nullptr, 0);
+			auto control=Interactive::GetNextControl(m_Parent, nullptr, 0);
 			if(control==this)
 				{
 				m_Menu->Close();
 				return;
 				}
 			}
-		auto control=Interactive::GetNextControl(Parent, this, -1);
+		auto control=Interactive::GetNextControl(m_Parent, this, -1);
 		if(control)
 			{
 			auto item=dynamic_cast<MenuItem*>(control);

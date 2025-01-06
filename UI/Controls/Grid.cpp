@@ -60,7 +60,7 @@ InitRaster(target);
 FLOAT scale=GetScaleFactor();
 rc.SetPadding(Padding*scale);
 UpdateRaster(rc);
-for(auto it=Children->First(); it->HasCurrent(); it->MoveNext())
+for(auto it=Children->Begin(); it->HasCurrent(); it->MoveNext())
 	{
 	auto child=it->GetCurrent();
 	if(!child)
@@ -199,7 +199,7 @@ row_count=TypeHelper::Max(row_count, 1U);
 FLOAT scale=GetScaleFactor();
 InitColumns(col_count, scale);
 InitRows(row_count, scale);
-for(auto it=Children->First(); it->HasCurrent(); it->MoveNext())
+for(auto it=Children->Begin(); it->HasCurrent(); it->MoveNext())
 	{
 	auto child=it->GetCurrent();
 	if(!child)

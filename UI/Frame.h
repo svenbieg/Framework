@@ -47,7 +47,7 @@ public:
 
 	// Common
 	Handle<Interactive> GetFocus()const { return m_Focus; }
-	Frame* GetFrame()override { return this; }
+	inline Frame* GetFrame()override { return this; }
 	POINT GetFrameOffset()const override { return POINT(0, 0); }
 	SIZE GetMinSize(RenderTarget* Target)override;
 	Interactive* GetPointerCapture()const { return m_PointerCapture; }

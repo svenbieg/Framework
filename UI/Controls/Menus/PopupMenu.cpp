@@ -57,7 +57,7 @@ bool icon=false;
 bool arrow=false;
 bool separator=true;
 Handle<UI::Window> last_sep;
-for(auto it=m_Panel->Children->First(); it->HasCurrent(); it->MoveNext())
+for(auto it=m_Panel->Children->Begin(); it->HasCurrent(); it->MoveNext())
 	{
 	auto child=it->GetCurrent();
 	auto item=child.As<PopupMenuItem>();
@@ -107,7 +107,7 @@ if(arrow)
 	SIZE arrow_size=target->MeasureText(font, scale, TEXT(">"));
 	shortcut_width+=arrow_size+10*scale;
 	}
-for(auto it=m_Panel->Children->First(); it->HasCurrent(); it->MoveNext())
+for(auto it=m_Panel->Children->Begin(); it->HasCurrent(); it->MoveNext())
 	{
 	auto child=it->GetCurrent();
 	auto item=child.As<PopupMenuItem>();
@@ -115,7 +115,7 @@ for(auto it=m_Panel->Children->First(); it->HasCurrent(); it->MoveNext())
 		continue;
 	item->SetColumns(icon_width, label_width, shortcut_width);
 	}
-return Overlapped::GetMinSize(target);
+return Popup::GetMinSize(target);
 }
 
 VOID PopupMenu::KillFocus()

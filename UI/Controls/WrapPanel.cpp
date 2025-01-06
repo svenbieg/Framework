@@ -33,7 +33,7 @@ FLOAT scale=GetScaleFactor();
 rc.SetPadding(Padding*scale);
 RECT rc_move(rc);
 UINT line_height=0;
-for(auto it=Children->First(); it->HasCurrent(); it->MoveNext())
+for(auto it=Children->Begin(); it->HasCurrent(); it->MoveNext())
 	{
 	auto child=it->GetCurrent();
 	if(!child->Visible)

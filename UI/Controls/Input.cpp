@@ -48,7 +48,7 @@ VOID Input::AppendLines(Handle<StringList> lines)
 {
 if(!lines)
 	return;
-for(auto it=lines->First(); it->HasCurrent(); it->MoveNext())
+for(auto it=lines->Begin(); it->HasCurrent(); it->MoveNext())
 	{
 	INPUT_LINE& line=m_Lines.append();
 	line.Text=it->GetCurrent();

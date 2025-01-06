@@ -27,7 +27,7 @@ namespace UI {
 Graphics::SIZE Canvas::GetMinSize(RenderTarget* target)
 {
 SIZE size(0, 0);
-for(auto it=Children->First(); it->HasCurrent(); it->MoveNext())
+for(auto it=Children->Begin(); it->HasCurrent(); it->MoveNext())
 	{
 	auto child=it->GetCurrent();
 	if(!child->Visible)

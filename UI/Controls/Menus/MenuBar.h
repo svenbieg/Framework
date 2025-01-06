@@ -53,9 +53,7 @@ private:
 	VOID OnFrameKeyEvent(KeyEventType Type, Handle<KeyEventArgs> Args);
 	VOID OnFrameKeyDown(Handle<KeyEventArgs> Args);
 	VOID OnFrameKeyUp(Handle<KeyEventArgs> Args);
-	VOID OnParentChanged();
 	BOOL m_Entering;
-	Frame* m_OldFrame;
 };
 
 }}}

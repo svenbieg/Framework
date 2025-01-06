@@ -133,7 +133,7 @@ switch(args->Key)
 		}
 	case VirtualKey::Left:
 		{
-		auto control=Interactive::GetNextControl(Parent, this, -1);
+		auto control=Interactive::GetNextControl(m_Parent, this, -1);
 		if(control)
 			{
 			auto item=dynamic_cast<MenuItem*>(control);
@@ -148,7 +148,7 @@ switch(args->Key)
 		}
 	case VirtualKey::Right:
 		{
-		auto control=Interactive::GetNextControl(Parent, this, -1);
+		auto control=Interactive::GetNextControl(m_Parent, this, -1);
 		if(control)
 			{
 			auto item=dynamic_cast<MenuItem*>(control);

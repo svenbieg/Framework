@@ -75,8 +75,12 @@ OnTextChanged();
 
 VOID ToolTip::DoClose()
 {
-m_Panel->Parent=nullptr;
-m_Panel=nullptr;
+if(m_Panel)
+	{
+	auto frame=m_Parent->GetFrame();
+	frame->Children->Remove(m_Panel);
+	m_Panel=nullptr;
+	}
 }
 
 VOID ToolTip::OnParentClicked()

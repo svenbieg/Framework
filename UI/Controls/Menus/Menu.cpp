@@ -31,7 +31,7 @@ BOOL Menu::Accelerate(VirtualKey key)
 if(!FlagHelper::Get(m_MenuFlags, MenuFlags::KeyboardAccess))
 	return false;
 CHAR acc=(CHAR)key;
-for(auto it=m_Panel->Children->First(); it->HasCurrent(); it->MoveNext())
+for(auto it=m_Panel->Children->Begin(); it->HasCurrent(); it->MoveNext())
 	{
 	auto child=(UI::Window*)it->GetCurrent();
 	auto item=dynamic_cast<MenuItem*>(child);
