@@ -12,6 +12,8 @@
 #include "UI/Application.h"
 #include "Interactive.h"
 
+using namespace Graphics;
+
 
 //===========
 // Namespace
@@ -29,6 +31,11 @@ VOID Interactive::CapturePointer()
 {
 auto frame=GetFrame();
 frame->SetPointerCapture(this);
+}
+
+Handle<Cursor> Interactive::GetCursor()
+{
+return m_Theme->DefaultCursor;
 }
 
 Interactive* Interactive::GetNextControl(Window* window, Interactive* control, INT relative)
@@ -53,7 +60,7 @@ return frame->GetFocus()==this;
 
 BOOL Interactive::HasPointerFocus()
 {
-return Application::Get()->GetPointerFocus()==this;
+return Application::GetCurrent()->GetPointerFocus()==this;
 }
 
 BOOL Interactive::IsCapturingPointer()
@@ -94,6 +101,21 @@ VOID Interactive::ReleasePointer()
 auto frame=GetFrame();
 if(frame->GetPointerCapture()==this)
 	frame->SetPointerCapture(nullptr);
+}
+
+VOID Interactive::Render(RenderTarget* target, RECT& rc)
+{
+auto background=GetBackground();
+BOOL focus=HasFocus();
+focus|=HasPointerFocus();
+if(focus)
+	background=m_Theme->HighlightBrush;
+if(!background)
+	return;
+RECT rc_fill(rc);
+auto offset=target->GetOffset();
+rc_fill.Move(offset);
+target->FillRect(rc_fill, background);
 }
 
 VOID Interactive::SetFocus(FocusReason reason)
@@ -230,15 +252,16 @@ if(args->Button==PointerButton::Left)
 
 VOID Interactive::OnPointerEntered()
 {
-auto cursor=this->GetCursor();
 auto frame=GetFrame();
+auto cursor=GetCursor();
 frame->SetCursor(cursor);
 }
 
 VOID Interactive::OnPointerLeft()
 {
 auto frame=GetFrame();
-frame->SetCursor(nullptr);
+auto cursor=m_Theme->DefaultCursor;
+frame->SetCursor(cursor);
 }
 
 VOID Interactive::OnPointerUp(Handle<PointerEventArgs> args)

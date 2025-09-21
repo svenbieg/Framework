@@ -30,15 +30,9 @@ namespace UI {
 // Common
 //========
 
-Handle<Brush> Button::GetBackgroundBrush()
+Handle<Brush> Button::GetBackground()
 {
-auto theme=GetTheme();
-auto background=theme->ControlBrush;
-BOOL focus=HasFocus();
-focus|=HasPointerFocus();
-if(focus)
-	background=theme->HighlightBrush;
-return background;
+return m_Theme->ControlBrush;
 }
 
 Graphics::SIZE Button::GetMinSize(RenderTarget* target)
@@ -49,7 +43,7 @@ if(Border)
 FLOAT scale=GetScaleFactor();
 if(Text)
 	{
-	auto font=GetFont();
+	auto font=m_Theme->DefaultFont;
 	SIZE text_size=target->MeasureText(font, scale, Text->Begin());
 	size.Width+=text_size.Width;
 	size.Height=TypeHelper::Max(size.Height, text_size.Height);
@@ -61,10 +55,9 @@ return size.Max(MinSize*scale);
 VOID Button::Render(RenderTarget* target, RECT& rc)
 {
 Interactive::Render(target, rc);
-auto theme=GetTheme();
 if(Border)
 	{
-	auto brush=theme->BorderBrush;
+	auto brush=m_Theme->BorderBrush;
 	target->DrawRect(rc, brush);
 	rc.SetPadding(1, 1, 1, 1);
 	}
@@ -72,9 +65,9 @@ FLOAT scale=GetScaleFactor();
 rc.SetPadding(Padding*scale);
 if(Text)
 	{
-	target->TextColor=theme->TextBrush;
-	target->Font=GetFont();
-	target->DrawText(rc, scale, Text->Begin());
+	auto font=m_Theme->DefaultFont;
+	auto brush=m_Theme->TextBrush;
+	target->DrawText(rc, scale, font, brush, Text->Begin());
 	}
 }
 

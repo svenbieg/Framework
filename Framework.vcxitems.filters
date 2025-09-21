@@ -171,6 +171,9 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)UI\Application.cpp">
       <Filter>UI</Filter>
     </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)Graphics\Brush.cpp">
+      <Filter>Graphics</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)UI\Input\KeyEvent.h">
@@ -305,9 +308,6 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)UI\Controls\Menus\EditMenu.h">
       <Filter>UI\Controls\Menus</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)Graphics\Theme.h">
-      <Filter>Graphics</Filter>
-    </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)Graphics\Bitmap.h">
       <Filter>Graphics</Filter>
     </ClInclude>
@@ -317,12 +317,6 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)Graphics\Color.h">
       <Filter>Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)Graphics\Cursor.h">
-      <Filter>Graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)Graphics\Font.h">
-      <Filter>Graphics</Filter>
-    </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)Graphics\Icon.h">
       <Filter>Graphics</Filter>
     </ClInclude>
@@ -330,9 +324,6 @@
       <Filter>Graphics</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)Graphics\Rect.h">
-      <Filter>Graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)Graphics\RenderTarget.h">
       <Filter>Graphics</Filter>
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)Graphics\Size.h">
@@ -349,6 +340,12 @@
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)UI\Application.h">
       <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)Resources\Icons\Icon.h">
+      <Filter>Resources\Icons</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)Resources\Strings\String.h">
+      <Filter>Resources\Strings</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

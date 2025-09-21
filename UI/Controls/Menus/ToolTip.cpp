@@ -119,9 +119,9 @@ VOID ToolTip::OnTimerTriggered()
 {
 if(m_Panel)
 	return;
-m_Timer=nullptr;
 auto frame=m_Parent->GetFrame();
-auto theme=frame->GetTheme();
+auto theme=m_Parent->GetTheme();
+m_Timer=nullptr;
 m_Panel=Panel::Create(frame);
 m_Panel->Background=theme->WindowBrush;
 m_Panel->Border=true;

@@ -47,25 +47,22 @@ public:
 	using Theme=Graphics::Theme;
 
 	// Common
-	Handle<Brush> Background;
 	virtual VOID BringToFront();
 	Handle<ChildList> Children;
-	Handle<Graphics::Font> Font;
-	virtual Handle<Brush> GetBackgroundBrush();
+	virtual Handle<Brush> GetBackground();
 	virtual RECT GetClientRect()const;
-	virtual Handle<Graphics::Font> GetFont();
-	virtual inline Frame* GetFrame() { return m_Parent->GetFrame(); }
+	inline Frame* GetFrame() { return m_Frame; }
 	virtual POINT GetFrameOffset()const;
 	RECT GetFrameRect()const;
 	virtual SIZE GetMinSize(RenderTarget* Target);
 	POINT GetOffset()const { return POINT(m_Rect.Left, m_Rect.Top); }
 	inline Window* GetParent()const { return m_Parent; }
 	inline RECT const& GetRect()const { return m_Rect; }
+	virtual RenderTarget* GetRenderTarget()const;
 	FLOAT GetScaleFactor()const;
 	virtual POINT GetScreenOffset()const;
 	RECT GetScreenRect()const;
-	virtual Handle<RenderTarget> GetTarget();
-	virtual Handle<Theme> GetTheme();
+	inline Theme* GetTheme()const { return m_Theme; }
 	Handle<Window> GetVisibleChild(UINT Id);
 	virtual VOID Invalidate(BOOL Rearrange=false);
 	BOOL IsInvalidated() { return FlagHelper::Get(m_Flags, WindowFlags::Repaint); }
@@ -78,6 +75,7 @@ public:
 	virtual VOID Render(RenderTarget* Target, RECT& Rect);
 	Event<Window, RenderTarget*, RECT&> Rendered;
 	FLOAT Scale;
+	VOID SetParent(Window* Parent);
 	VOID SetPosition(POINT const& Position);
 	VOID Validate() { FlagHelper::Clear(m_Flags, WindowFlags::Repaint); }
 	Property<Window, BOOL> Visible;
@@ -93,12 +91,14 @@ protected:
 		};
 
 	// Con-/Destructors
-	Window(Window* Parent=nullptr);
+	Window(Window* Parent);
 
 	// Common
 	WindowFlags m_Flags;
+	Frame* m_Frame;
 	Window* m_Parent;
 	RECT m_Rect;
+	Theme* m_Theme;
 
 private:
 	// Common

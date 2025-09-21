@@ -46,12 +46,6 @@ Handle<MenuBarItem> MenuBar::Add(Handle<Sentence> label)
 return MenuBarItem::Create(this, label);
 }
 
-Handle<Brush> MenuBar::GetBackgroundBrush()
-{
-auto theme=GetTheme();
-return theme->ControlBrush;
-}
-
 
 //==========================
 // Con-/Destructors Private
@@ -92,7 +86,7 @@ if(FlagHelper::Get(m_MenuFlags, MenuFlags::KeyboardAccess))
 	}
 Exit();
 FlagHelper::Set(m_MenuFlags, MenuFlags::KeyboardAccess);
-Application::Get()->SetCurrentMenu(this);
+Application::GetCurrent()->SetCurrentMenu(this);
 m_Entering=true;
 Invalidate();
 args->Handled=true;

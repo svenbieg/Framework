@@ -37,7 +37,7 @@ public:
 	// Common
 	BOOL Border;
 	Event<Button> Clicked;
-	Handle<Brush> GetBackgroundBrush()override;
+	Handle<Brush> GetBackground()override;
 	SIZE GetMinSize(RenderTarget* Target)override;
 	RECT Padding;
 	VOID Render(RenderTarget* Target, RECT& Rect)override;

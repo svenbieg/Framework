@@ -30,7 +30,14 @@ public:
 	static inline Handle<Brush> Create(COLOR Color) { return new Brush(Color); }
 
 	// Common
+	Event<Brush> Changed;
+	Event<Brush> Destroyed;
 	inline COLOR GetColor()const { return m_Color; }
+	VOID SetColor(COLOR Color);
+
+protected:
+	// Common
+	UINT Release()override;
 
 private:
 	// Con-/Destructors

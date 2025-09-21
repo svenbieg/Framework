@@ -36,24 +36,14 @@ children->Append(this, false);
 Invalidate(true);
 }
 
-Handle<Brush> Window::GetBackgroundBrush()
+Handle<Brush> Window::GetBackground()
 {
-return Background;
+return nullptr;
 }
 
 Graphics::RECT Window::GetClientRect()const
 {
 return RECT(0, 0, m_Rect.GetWidth(), m_Rect.GetHeight());
-}
-
-Handle<Graphics::Font> Window::GetFont()
-{
-if(Font)
-	return Font;
-if(m_Parent)
-	return m_Parent->GetFont();
-auto theme=GetTheme();
-return theme->DefaultFont;
 }
 
 Graphics::POINT Window::GetFrameOffset()const
@@ -89,6 +79,11 @@ for(auto it=Children->Begin(); it->HasCurrent(); it->MoveNext())
 return size.Max(MinSize*scale);
 }
 
+RenderTarget* Window::GetRenderTarget()const
+{
+return m_Frame->GetRenderTarget();
+}
+
 FLOAT Window::GetScaleFactor()const
 {
 if(!m_Parent)
@@ -109,20 +104,6 @@ Graphics::RECT Window::GetScreenRect()const
 {
 POINT offset=GetScreenOffset();
 return m_Rect.SetPosition(offset);
-}
-
-Handle<Graphics::RenderTarget> Window::GetTarget()
-{
-auto frame=this->GetFrame();
-if(!frame)
-	return nullptr;
-return frame->GetTarget();
-}
-
-Handle<Graphics::Theme> Window::GetTheme()
-{
-auto frame=GetFrame();
-return frame->GetTheme();
 }
 
 Handle<Window> Window::GetVisibleChild(UINT id)
@@ -150,7 +131,7 @@ BOOL transparent=false;
 if(m_Parent)
 	{
 	transparent=true;
-	auto background=this->GetBackgroundBrush();
+	auto background=GetBackground();
 	if(background)
 		{
 		auto c=background->GetColor();
@@ -165,8 +146,8 @@ if(transparent)
 	}
 else
 	{
-	auto frame=this->GetFrame();
-	frame->Invalidate(rearrange);
+	if(m_Frame)
+		m_Frame->Invalidate(rearrange);
 	}
 }
 
@@ -219,14 +200,52 @@ if(FlagHelper::Get(m_Flags, WindowFlags::Rearrange))
 
 VOID Window::Render(RenderTarget* target, RECT& rc)
 {
-auto background=this->GetBackgroundBrush();
-if(background)
+auto background=GetBackground();
+if(!background)
+	return;
+RECT rc_fill(rc);
+auto offset=target->GetOffset();
+rc_fill.Move(offset);
+target->FillRect(rc_fill, background);
+}
+
+VOID Window::SetParent(Window* parent)
+{
+Handle<Window> self=this;
+if(!parent)
 	{
-	RECT rc_fill(rc);
-	auto offset=target->GetOffset();
-	rc_fill.Move(offset);
-	target->FillRect(rc_fill, background);
+	if(!m_Parent)
+		return;
+	m_Parent->Children->Remove(this);
+	m_Parent->Invalidate(true);
+	m_Parent=nullptr;
+	m_Frame=nullptr;
+	m_Theme=nullptr;
+	for(auto it=Children->Begin(); it->HasCurrent(); it->MoveNext())
+		{
+		auto child=it->GetCurrent();
+		child->SetParent(this);
+		}
+	return;
 	}
+if(m_Parent!=parent)
+	{
+	if(m_Parent)
+		{
+		m_Parent->Children->Remove(this);
+		m_Parent->Invalidate(true);
+		}
+	m_Parent=parent;
+	m_Parent->Children->Append(this);
+	}
+m_Frame=m_Parent->m_Frame;
+m_Theme=m_Parent->m_Theme;
+for(auto it=Children->Begin(); it->HasCurrent(); it->MoveNext())
+	{
+	auto child=it->GetCurrent();
+	child->SetParent(this);
+	}
+Invalidate(true);
 }
 
 VOID Window::SetPosition(POINT const& pt)
@@ -248,16 +267,19 @@ Scale(1.f),
 Visible(this, true),
 // Protected
 m_Flags(WindowFlags::None),
+m_Frame(nullptr),
+m_Parent(parent),
 m_Rect(0, 0, 0, 0),
-// Private
-m_Parent(parent)
+m_Theme(nullptr)
 {
 Children=ChildList::Create();
 Visible.Changed.Add(this, &Window::OnVisibleChanged);
 if(m_Parent)
 	{
 	m_Parent->Children->Append(this);
-	Font=m_Parent->Font;
+	m_Parent->Invalidate(true);
+	m_Frame=m_Parent->m_Frame;
+	m_Theme=m_Parent->m_Theme;
 	}
 }
 

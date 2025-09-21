@@ -15,7 +15,8 @@
 #include "Storage/Streams/InputStream.h"
 #include "Timing/Timer.h"
 #include "UI/Controls/Menus/PopupMenu.h"
-#include "Interactive.h"
+#include "UI/Controls/Interactive.h"
+#include "StringBuilder.h"
 
 
 //===========
@@ -48,7 +49,6 @@ public:
 	VOID Clear();
 	VOID ClearSelection();
 	Handle<PopupMenu> ContextMenu;
-	Handle<Brush> GetBackgroundBrush()override;
 	Handle<Cursor> GetCursor()override;
 	RECT GetCursorRect();
 	UINT GetLineHeight()const;
@@ -94,6 +94,7 @@ private:
 	POINT GetEndPoint();
 	UINT GetLineHeight(RenderTarget* Target, FLOAT Scale);
 	UINT GetLineWidth(INPUT_LINE const& Line, FLOAT ScaleFactor);
+	UINT GetText(POINT const& Start, POINT const& End, StringBuilder& Builder);
 	UINT GetText(POINT const& Start, POINT const& End, LPTSTR Buffer, UINT Size);
 	UINT GetTextLength(POINT const& Start, POINT const& End);
 	VOID MoveCursor(INT X, INT Y, BOOL Select, BOOL Notify=true);

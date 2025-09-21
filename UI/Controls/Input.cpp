@@ -12,10 +12,11 @@
 #include "Concurrency/DispatchedQueue.h"
 #include "Storage/Clipboard.h"
 #include "Storage/Streams/StreamReader.h"
-#include "Storage/Buffer.h"
+#include "Storage/StringBuffer.h"
 #include "UI/Controls/Menus/EditMenu.h"
+#include "UI/Controls/Input.h"
 #include "UI/Application.h"
-#include "Input.h"
+#include "StringBuilder.h"
 
 using namespace Concurrency;
 using namespace Graphics;
@@ -73,18 +74,9 @@ if(changed)
 	UpdateSelection();
 }
 
-Handle<Brush> Input::GetBackgroundBrush()
-{
-auto theme=GetTheme();
-if(!IsEnabled())
-	return theme->ControlBrush;
-return theme->WindowBrush;
-}
-
 Handle<Cursor> Input::GetCursor()
 {
-auto theme=GetTheme();
-return theme->TextCursor;
+return m_Theme->TextCursor;
 }
 
 Graphics::RECT Input::GetCursorRect()
@@ -128,10 +120,9 @@ Handle<String> Input::GetSelection()
 UINT len=GetTextLength(m_SelectionFirst, m_SelectionLast);
 if(!len)
 	return nullptr;
-auto text=String::Create(len, nullptr);
-auto buf=const_cast<LPTSTR>(text->Begin());
-GetText(m_SelectionFirst, m_SelectionLast, buf, len+1);
-return text;
+StringBuilder builder(len);
+GetText(m_SelectionFirst, m_SelectionLast, builder);
+return builder.ToString();
 }
 
 Handle<String> Input::GetText()
@@ -141,15 +132,14 @@ POINT pt_end=GetEndPoint();
 UINT len=GetTextLength(pt_start, pt_end);
 if(!len)
 	return nullptr;
-auto text=String::Create(len, nullptr);
-auto buf=const_cast<LPTSTR>(text->Begin());
-GetText(pt_start, pt_end, buf, len+1);
-return text;
+StringBuilder builder(len);
+GetText(pt_start, pt_end, builder);
+return builder.ToString();
 }
 
 BOOL Input::KillFocus()
 {
-auto app=Application::Get();
+auto app=Application::GetCurrent();
 if(app->GetCurrentInput()==this)
 	app->SetCurrentInput(nullptr);
 return Interactive::KillFocus();
@@ -174,14 +164,18 @@ while(1)
 
 VOID Input::Render(RenderTarget* target, RECT& rc)
 {
-Interactive::Render(target, rc);
-auto theme=GetTheme();
-target->Font=GetFont();
-target->TextColor=theme->TextBrush;
+auto background=GetBackground();
+BOOL enabled=IsEnabled();
+if(!enabled)
+	background=m_Theme->ControlBrush;
+RECT rc_fill(rc);
+auto offset=target->GetOffset();
+rc_fill.Move(offset);
+if(background)
+	target->FillRect(rc_fill, background);
 FLOAT scale=GetScaleFactor();
 rc.SetPadding(Padding*scale);
 UINT client_height=rc.GetHeight();
-POINT offset=target->GetOffset();
 UINT line_height=m_LineHeight*scale;
 UINT first_line=offset.Top/line_height;
 UINT line_count=client_height/line_height+2;
@@ -189,13 +183,13 @@ UINT last_line=first_line+line_count-1;
 BOOL show_sel=true;
 if(m_SelectionFirst==m_SelectionLast)
 	show_sel=false;
-if(Application::Get()->GetCurrentInput()!=this)
+if(Application::GetCurrent()->GetCurrentInput()!=this)
 	show_sel=false;
 if(show_sel)
 	{
-	auto highlight=theme->HighlightBrush;
+	auto highlight=m_Theme->HighlightBrush;
 	if(!HasFocus())
-		highlight=theme->InactiveHighlightBrush;
+		highlight=m_Theme->HighlightInactiveBrush;
 	POINT pt_first=PointFromChar(m_SelectionFirst, scale);
 	POINT pt_last=PointFromChar(m_SelectionLast, scale);
 	if(m_SelectionFirst.Top==m_SelectionLast.Top)
@@ -225,6 +219,8 @@ if(show_sel)
 		target->FillRect(rc_last, highlight);
 		}
 	}
+auto font=m_Theme->DefaultFont;
+auto brush=m_Theme->TextBrush;
 UINT top=rc.Top+first_line*line_height;
 UINT line=0;
 for(auto it=m_Lines.cbegin(first_line); it.has_current(); it.move_next(), line++)
@@ -235,7 +231,7 @@ for(auto it=m_Lines.cbegin(first_line); it.has_current(); it.move_next(), line++
 	if(text)
 		{
 		RECT rc_text(rc.Left, top, rc.Right, top+line_height);
-		target->DrawText(rc_text, scale, text->Begin());
+		target->DrawText(rc_text, scale, font, brush, text->Begin());
 		}
 	top+=line_height;
 	}
@@ -251,13 +247,13 @@ if(show_cursor)
 	{
 	POINT pt_cursor=PointFromChar(m_CursorPos, scale);
 	POINT pt_to(pt_cursor.Left, pt_cursor.Top+line_height);
-	auto brush=theme->TextBrush;
 	target->DrawLine(pt_cursor, pt_to, brush);
 	}
 }
 
 VOID Input::ReplaceSelection(LPCTSTR replace)
 {
+
 if(ReadOnly)
 	return;
 if(!replace)
@@ -318,21 +314,20 @@ while(replace[str_pos])
 		}
 	UINT insert_len=str_pos-line_start;
 	UINT line_len=before_len+insert_len;
-	auto text=String::Create(line_len, nullptr);
-	auto str=const_cast<LPTSTR>(text->Begin());
+	StringBuilder builder(line_len);
 	if(before)
 		{
-		StringHelper::Copy(str, line_len+1, before);
-		StringHelper::Copy(&str[before_len], line_len+1-before_len, &replace[line_start], insert_len);
+		builder.Append(before);
+		builder.Append(insert_len, &replace[line_start]);
 		before=nullptr;
 		before_len=0;
 		}
 	else
 		{
-		StringHelper::Copy(str, line_len+1, &replace[line_start], insert_len);
+		builder.Append(insert_len, &replace[line_start]);
 		}
 	INPUT_LINE& line=m_Lines.insert_at(m_SelectionStart.Top);
-	line.Text=text;
+	line.Text=builder.ToString();
 	UpdateLine(line);
 	m_SelectionFirst.Top++;
 	m_SelectionFirst.Left=0;
@@ -344,16 +339,15 @@ UINT line_len=before_len+insert_len+after_len;
 INPUT_LINE& line=m_Lines.insert_at(m_SelectionFirst.Top);
 if(line_len>0)
 	{
-	auto text=String::Create(line_len, nullptr);
-	auto str=const_cast<LPTSTR>(text->Begin());
+	StringBuilder builder(line_len);
 	UINT pos=0;
 	if(before_len)
-		pos+=StringHelper::Copy(&str[pos], line_len+1-pos, before);
+		pos+=builder.Append(before);
 	if(insert_len)
-		pos+=StringHelper::Copy(&str[pos], line_len+1-pos, &replace[line_start], insert_len);
+		pos+=builder.Append(insert_len, &replace[line_start]);
 	if(after_len)
-		pos+=StringHelper::Copy(&str[pos], line_len+1-pos, after);
-	line.Text=text;
+		pos+=builder.Append(after);
+	line.Text=builder.ToString();
 	UpdateLine(line);
 	}
 m_SelectionFirst.Left=before_len+insert_len;
@@ -380,7 +374,7 @@ SetSelection(m_SelectionEnd, m_SelectionEnd);
 VOID Input::SetFocus(FocusReason reason)
 {
 Interactive::SetFocus(reason);
-Application::Get()->SetCurrentInput(this);
+Application::GetCurrent()->SetCurrentInput(this);
 }
 
 VOID Input::SetSelection(POINT const& pt_start, POINT const& pt_end)
@@ -407,7 +401,9 @@ if(!text)
 	Clear();
 	return;
 	}
-auto buf=Buffer::Create(text->Begin(), 0, BufferOptions::Static);
+UINT len=text->GetLength();
+SIZE_T size=(len+1)*sizeof(TCHAR);
+auto buf=StringBuffer::Create(text);
 ReadFromStream(buf);
 }
 
@@ -431,7 +427,7 @@ m_SelectionFirst(-1, -1),
 m_SelectionLast(-1, -1),
 m_SelectionStart(-1, -1)
 {
-ContextMenu=EditMenu::Create(this);
+ContextMenu=EditMenu::Create();
 Focused.Add(this, &Input::OnFocused);
 FocusLost.Add(this, &Input::OnFocusLost);
 KeyDown.Add(this, &Input::OnKeyDown);
@@ -494,8 +490,7 @@ return pt_end;
 
 UINT Input::GetLineHeight(RenderTarget* target, FLOAT scale)
 {
-auto theme=GetTheme();
-auto font=theme->DefaultFont;
+auto font=m_Theme->DefaultFont;
 SIZE size=target->MeasureText(font, scale, TEXT("Ag"), 2);
 return size.Height;
 }
@@ -507,6 +502,38 @@ if(!count)
 	return 0;
 UINT offset=line.Offsets.get_at(count-1);
 return offset*scale;
+}
+
+UINT Input::GetText(POINT const& pt_start, POINT const& pt_end, StringBuilder& builder)
+{
+UINT line_count=m_Lines.get_count();
+if(!line_count)
+	return 0;
+if(pt_start.Top==pt_end.Top)
+	{
+	INPUT_LINE const& line=m_Lines.get_at(pt_start.Top);
+	UINT copy=pt_end.Left-pt_start.Left;
+	auto text=line.Text->Begin();
+	return builder.Append(copy, &text[pt_start.Left]);
+	}
+UINT line_id=pt_start.Top;
+auto it=m_Lines.cbegin(line_id);
+INPUT_LINE const& first_line=it.get_current();
+auto text=first_line.Text->Begin();
+UINT len=builder.Append(&text[pt_start.Left]);
+it.move_next();
+for(++line_id; line_id<pt_end.Top; it.move_next(), line_id++)
+	{
+	len+=builder.Append(TEXT("\r\n"));
+	INPUT_LINE const& line=it.get_current();
+	text=line.Text->Begin();
+	len+=builder.Append(text);
+	}
+len+=builder.Append(TEXT("\r\n"));
+INPUT_LINE const& last_line=it.get_current();
+text=last_line.Text->Begin();
+len+=builder.Append(pt_end.Left, text);
+return len;
 }
 
 UINT Input::GetText(POINT const& pt_start, POINT const& pt_end, LPTSTR buf, UINT size)
@@ -905,8 +932,6 @@ else
 
 VOID Input::UpdateLine(INPUT_LINE& line)
 {
-auto target=GetTarget();
-auto font=GetFont();
 UINT char_count=line.Offsets.get_count();
 if(char_count>0)
 	{
@@ -923,7 +948,8 @@ auto str=line.Text->Begin();
 SIZE size;
 for(UINT pos=0; str[pos]; pos++)
 	{
-	size=target->MeasureText(font, 1.0, str, pos+1);
+	auto font=m_Theme->DefaultFont;
+	size=GetRenderTarget()->MeasureText(font, 1.f, str, pos+1);
 	line.Offsets.append(size.Width);
 	}
 UINT line_width=size.Width;
