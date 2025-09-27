@@ -9,8 +9,9 @@
 // Using
 //=======
 
+#include "UI/Controls/Interactive.h"
 #include "UI/Application.h"
-#include "Interactive.h"
+#include "UI/Frame.h"
 
 using namespace Graphics;
 
@@ -253,6 +254,8 @@ if(args->Button==PointerButton::Left)
 VOID Interactive::OnPointerEntered()
 {
 auto frame=GetFrame();
+if(!frame)
+	return;
 auto cursor=GetCursor();
 frame->SetCursor(cursor);
 }
@@ -260,6 +263,8 @@ frame->SetCursor(cursor);
 VOID Interactive::OnPointerLeft()
 {
 auto frame=GetFrame();
+if(!frame)
+	return;
 auto cursor=m_Theme->DefaultCursor;
 frame->SetCursor(cursor);
 }
