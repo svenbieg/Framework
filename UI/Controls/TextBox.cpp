@@ -2,14 +2,12 @@
 // TextBox.cpp
 //=============
 
-#include "pch.h"
+#include "UI/Controls/TextBox.h"
 
 
 //=======
 // Using
 //=======
-
-#include "TextBox.h"
 
 using namespace Graphics;
 
@@ -92,6 +90,7 @@ ReadOnly(this)
 {
 AlignHorizontal=HorizontalAlignment::Stretch;
 AlignVertical=VerticalAlignment::Stretch;
+Enabled.Changed.Add(this, &TextBox::OnEnabledChanged);
 ReadOnly.Changed.Add(this, &TextBox::OnReadOnlyChanged);
 ZoomMax=10.f;
 m_Input=Input::Create(Body);
@@ -104,6 +103,11 @@ m_Input->SelectionChanged.Add(this, &TextBox::OnInputSelectionChanged);
 //================
 // Common Private
 //================
+
+VOID TextBox::OnEnabledChanged(BOOL enabled)
+{
+m_Input->Enabled=enabled;
+}
 
 VOID TextBox::OnInputSelectionChanged()
 {

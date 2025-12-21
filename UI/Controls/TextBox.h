@@ -9,8 +9,8 @@
 // Using
 //=======
 
-#include "Input.h"
-#include "ScrollBox.h"
+#include "UI/Controls/Input.h"
+#include "UI/Controls/ScrollBox.h"
 
 
 //===========
@@ -53,6 +53,7 @@ private:
 	TextBox(Window* Parent);
 
 	// Common
+	VOID OnEnabledChanged(BOOL Enabled);
 	VOID OnInputSelectionChanged();
 	VOID OnReadOnlyChanged(BOOL ReadOnly);
 	Handle<Input> m_Input;
